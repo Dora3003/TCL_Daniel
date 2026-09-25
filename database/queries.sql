@@ -1,13 +1,18 @@
 -- Consultas úteis para validação no DBeaver
 
--- Veículos atualmente no pátio
-SELECT id, placa, entrada_em, status
+-- Veículos no pátio (ainda não saíram)
+SELECT id, placa, token, motorista_nome, entrada_em, status, pago_em, valor_cobrado, valor_multa
 FROM registros_estacionamento
-WHERE status = 'ativo'
+WHERE status <> 'finalizado'
 ORDER BY entrada_em;
 
+-- Ticket por token
+SELECT *
+FROM registros_estacionamento
+WHERE token = 'U3T98LX';
+
 -- Histórico de uma placa
-SELECT id, placa, entrada_em, saida_em, valor_cobrado, status
+SELECT id, placa, token, entrada_em, saida_em, valor_cobrado, valor_multa, status
 FROM registros_estacionamento
 WHERE placa = 'ABC1234'
 ORDER BY entrada_em DESC;

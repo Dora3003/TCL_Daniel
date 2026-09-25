@@ -9,6 +9,13 @@ docker compose up -d
 
 O schema é criado automaticamente via `init.sql` na primeira inicialização do container.
 
+Se o volume já existir com schema antigo, recrie:
+
+```bash
+docker compose down -v
+docker compose up -d
+```
+
 ## Conectar no DBeaver
 
 1. Instale o [DBeaver](https://dbeaver.io/download/) (Community Edition é suficiente)
@@ -41,8 +48,8 @@ Use o arquivo `queries.sql` como ponto de partida. Exemplos rápidos:
 
 ```sql
 -- Inserir entrada manual (teste)
-INSERT INTO registros_estacionamento (placa, entrada_em, status)
-VALUES ('ABC1234', NOW(), 'ativo');
+INSERT INTO registros_estacionamento (placa, token, motorista_nome, entrada_em, status)
+VALUES ('ABC1234', 'U3T98LX', 'Ana Souza', NOW(), 'ativo');
 
 -- Listar ativos
 SELECT * FROM registros_estacionamento WHERE status = 'ativo';
