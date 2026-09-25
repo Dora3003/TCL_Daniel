@@ -23,7 +23,7 @@ npm install
 npm run dev
 ```
 
-API em `http://localhost:3000`. Specs TLC em `backend/.specs/features/backend-api/`.
+API em `http://localhost:3000`. Swagger em `http://localhost:3000/api/docs`. Specs TLC em `backend/.specs/features/backend-api/`.
 
 Se o banco já existia com o schema antigo:
 
@@ -44,7 +44,28 @@ docker compose up -d
 | POST | `/api/tickets/:token/multas` | Cliente |
 | POST | `/api/saida` | Catraca |
 | GET | `/api/health` | Operação |
+| GET | `/api/docs` | Swagger UI |
+| GET | `/api/openapi.json` | Spec OpenAPI |
 
 Impressão do ticket e QR são pressuposto: o cadastro devolve `token` e `loginUrl`.
+
+## Deploy no Vercel
+
+O Vercel sobe o backend como container a partir de `backend/Dockerfile.vercel` (`vercel.json` na raiz). O Postgres **não** vai no Vercel: use um banco hospedado (Neon, Supabase, Railway) e configure:
+
+- `DATABASE_URL`
+- `FRONTEND_URL`
+- `CORS_ORIGIN` (pode ser `*`)
+
+```bash
+npx vercel login
+npx vercel --prod
+```
+
+Local com API em container:
+
+```bash
+docker compose up --build
+```
 
 Conexão DBeaver: `database/README.md`.

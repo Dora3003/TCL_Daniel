@@ -13,6 +13,6 @@ const port = Number(process.env.PORT ?? 3000);
 const service = new RegistroService(new RegistroRepository(), frontendUrl);
 const app = createApp(service, checkConnection);
 
-app.listen(port, () => {
-  console.log(`API escutando em http://localhost:${port}`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`API escutando em http://0.0.0.0:${port}`);
 });

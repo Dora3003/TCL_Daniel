@@ -1,6 +1,8 @@
 import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
 import { z } from 'zod';
+import { openapi } from './docs/openapi.js';
 import { AppError } from './types/registro.js';
 import { RegistroService } from './services/registro.service.js';
 
@@ -29,8 +31,12 @@ export function createApp(
   service: RegistroService,
   checkDb: () => Promise<boolean>,
 ) {
+  const origins = (process.env.CORS_ORIGIN ?? process.env.FRONTEND_URL ?? 'http://localhost:5173')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
   const app = express();
-  app.use(cors({ origin: 'http://localhost:5173' }));
+  app.use(cors({ origin: origins.includes('*') ? true : origins }));
   app.use(express.json());
 
   app.use((req, res, next) => {
@@ -40,6 +46,11 @@ export function createApp(
     });
     next();
   });
+
+  app.get('/api/openapi.json', (_req, res) => {
+    res.status(200).json(openapi);
+  });
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openapi, { explorer: true }));
 
   app.get(
     '/api/health',

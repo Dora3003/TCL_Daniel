@@ -17,5 +17,21 @@ services:
       timeout: 5s
       retries: 5
 
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.vercel
+    container_name: estacionamento-api
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@db:5432/${POSTGRES_DB:-estacionamento}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      PORT: "80"
+    ports:
+      - "${PORT:-3000}:80"
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   pgdata:

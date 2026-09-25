@@ -119,4 +119,15 @@ describe('HTTP API', () => {
     const res = await request(app).put('/api/entrada');
     assert.equal(res.status, 405);
   });
+
+  it('expõe OpenAPI e Swagger UI', async () => {
+    const { app } = montar();
+    const spec = await request(app).get('/api/openapi.json');
+    assert.equal(spec.status, 200);
+    assert.equal(spec.body.openapi, '3.0.3');
+    assert.ok(spec.body.paths['/api/entrada']);
+    const docs = await request(app).get('/api/docs/');
+    assert.equal(docs.status, 200);
+    assert.match(String(docs.text), /swagger/i);
+  });
 });
