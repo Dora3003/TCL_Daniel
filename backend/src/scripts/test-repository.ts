@@ -1,6 +1,7 @@
 import { checkConnection } from '../db/pool.js';
 import { RegistroRepository } from '../repositories/registro.repository.js';
 import { RepositoryError } from '../types/registro.js';
+import { gerarToken } from '../domain/regras.js';
 
 async function main() {
   const connected = await checkConnection();
@@ -15,26 +16,37 @@ async function main() {
   console.log('✅ Conexão com PostgreSQL OK');
   console.log(`→ Registrando entrada: ${placaTeste}`);
 
-  const entrada = await repo.registrarEntrada(placaTeste);
-  console.log('  Entrada:', entrada.placa, entrada.status);
+  const entrada = await repo.registrarEntrada({
+    placa: placaTeste,
+    motoristaNome: 'Teste',
+    token: gerarToken(),
+    entradaEm: new Date(),
+  });
+  console.log('  Entrada:', entrada.placa, entrada.status, entrada.token);
 
-  const ativos = await repo.listarAtivos();
-  console.log(`→ Veículos ativos: ${ativos.length}`);
+  const ativos = await repo.listarNoPatio();
+  console.log(`→ Veículos no pátio: ${ativos.length}`);
 
   try {
-    await repo.registrarEntrada(placaTeste);
+    await repo.registrarEntrada({
+      placa: placaTeste,
+      motoristaNome: 'Teste',
+      token: gerarToken(),
+      entradaEm: new Date(),
+    });
     console.error('❌ Deveria ter falhado com PLACA_JA_ATIVA');
     process.exit(1);
   } catch (error) {
     if (error instanceof RepositoryError && error.code === 'PLACA_JA_ATIVA') {
-      console.log('✅ Constraint de placa ativa funcionando');
+      console.log('✅ Constraint de placa no pátio funcionando');
     } else {
       throw error;
     }
   }
 
-  const saida = await repo.registrarSaida(placaTeste, 5.0);
-  console.log('→ Saída:', saida.valorCobrado, 'BRL');
+  const pago = await repo.marcarPago(entrada.id, 5, new Date());
+  const saida = await repo.finalizarSaida(pago.id, new Date());
+  console.log('→ Saída:', saida.valorCobrado, 'BRL', saida.status);
   const historico = await repo.historicoPorPlaca(placaTeste);
   console.log(`→ Histórico: ${historico.length} registro(s)`);
   console.log('\n✅ Repositório validado com sucesso');
